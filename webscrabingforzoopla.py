@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
+import openpyxl
 
 # create a new Chrome browser instance
 driver = webdriver.Chrome()
@@ -22,18 +23,27 @@ time.sleep(5)
 # find all property listings on the page
 listings = driver.find_elements_by_class_name("listing-results-wrapper")
 
-# loop through each property listing and print out some details
+# create a new Excel workbook and worksheet
+workbook = openpyxl.Workbook()
+worksheet = workbook.active
+
+# write the scraped data to the worksheet
+row_num = 1
 for listing in listings:
     address = listing.find_element_by_class_name("listing-results-address").text
     price = listing.find_element_by_class_name("listing-results-price").text
     bedrooms = listing.find_element_by_class_name("num-icon.num-beds").text
     bathrooms = listing.find_element_by_class_name("num-icon.num-baths").text
 
-    print(f"Address: {address}")
-    print(f"Price: {price}")
-    print(f"Bedrooms: {bedrooms}")
-    print(f"Bathrooms: {bathrooms}")
-    print("----")
+    worksheet.cell(row=row_num, column=1, value=address)
+    worksheet.cell(row=row_num, column=2, value=price)
+    worksheet.cell(row=row_num, column=3, value=bedrooms)
+    worksheet.cell(row=row_num, column=4, value=bathrooms)
+
+    row_num += 1
+
+# save the workbook to a file
+workbook.save("zoopla_properties.xlsx")
 
 # close the browser
 driver.close()
