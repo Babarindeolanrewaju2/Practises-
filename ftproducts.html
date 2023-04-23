@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Product Manager</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Product Manager</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">Add
+            Product</button>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Add Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <input type="text" class="form-control" id="description" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price:</label>
+                            <input type="number" class="form-control" id="price" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" class="form-control" id="quantity" min="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addProduct()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Edit Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="edit-name">Name:</label>
+                            <input type="text" class="form-control" id="edit-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-description">Description:</label>
+                            <input type="text" class="form-control" id="edit-description" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-price">Price:</label>
+                            <input type="number" class="form-control" id="edit-price" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-quantity">Quantity:</label>
+                            <input type="number" class="form-control" id="edit-quantity" min="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Function to fetch all products from API and display in table
+        function fetchProducts() {
+            $.get('/products', function (data) {
+                const tbody = $('table tbody');
+                tbody.empty();
+                data.forEach(function (product) {
+                    const tr = $('<tr>').appendTo(tbody);
+                    $('<td>').text(product._id).appendTo(tr);
+                    $('<td>').text(product.name).appendTo(tr);
+                    $('<td>').text(product.description).appendTo(tr);
+                    $('<td>').text(product.price.toFixed(2)).appendTo(tr);
+                    $('<td>').text(product.quantity).appendTo(tr);
+                    const td = $('<td>').appendTo(tr);
+                    $('<button>').text('Edit').addClass('btn btn-primary mr-1').attr('data-id', product
+                        ._id).click(editProduct).appendTo(td);
+                    $('<button>').text('Delete').addClass('btn btn-danger').attr('data-id', product._id)
+                        .click(deleteProduct).appendTo(td);
+                });
+            });
+        }
+
+        // Function to add new product using API and refresh table
+        function addProduct() {
+            const product = {
+                name: $('#name').val(),
+                description: $('#description').val(),
+                price: parseFloat($('#price').val()),
+                quantity: parseInt($('#quantity').val())
+            };
+            $.post('/products', product, function (data) {
+                $('#addProductModal').modal('hide');
+                fetchProducts();
+            });
+        }
+
+        // Function to show edit product modal and pre-fill form
+        function editProduct() {
+            const id = $(this).attr('data-id');
+            $.get(`/products/${id}`, function (data) {
+                $('#edit-name').val(data.name);
+                $('#edit-description').val(data.description);
+                $('#edit-price').val(data.price.toFixed(2));
+                $('#edit-quantity').val(data.quantity);
+                $('#editProductModal').modal('show').attr('data-id', id);
+            });
+        }
+
+        // Function to save changes to product using API and refresh table
+        function saveProduct() {
+            const id = $('#editProductModal').attr('data-id');
+            const product = {
+                name: $('#edit-name').val(),
+                description: $('#edit-description').val(),
+                price: parseFloat($('#edit-price').val()),
+                quantity: parseInt($('#edit-quantity').val())
+            };
+            $.ajax({
+                url: `/products/${id}`,
+                type: 'PUT',
+                data: product,
+                success: function (data) {
+                    $('#editProductModal').modal('hide');
+                    fetchProducts();
+                }
+            });
+        }
+
+        // Function to delete product using API and refresh table
+        function deleteProduct() {
+            const id = $(this).attr('data-id');
+            if (confirm('Are you sure you want to delete this product?')) {
+                $.ajax({
+                    url: `/products/$ {
+                        id
+                    }`,
+                    type: 'DELETE',
+                    success: function (data) {
+                        fetchProducts();
+                    }
+                });
+            }
+        }
+
+        // Load products on page load
+        $(function () {
+            fetchProducts();
+        });
+    </script>
+
+</body>
+
+</html>
