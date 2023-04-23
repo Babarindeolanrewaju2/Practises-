@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Loan Payment Calculator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Loan Payment Calculator</h1>
+  <div class="form-group">
+    <label for="numPayments">Number of payments:</label>
+    <input type="number" class="form-control" id="numPayments" min="1">
+  </div>
+  <div class="form-group">
+    <label for="interestRate">Interest rate (%):</label>
+    <input type="number" class="form-control" id="interestRate" min="0" step="0.01">
+  </div>
+  <div class="form-group">
+    <label for="loanAmount">Loan amount:</label>
+    <input type="number" class="form-control" id="loanAmount" min="1">
+  </div>
+  <button type="button" class="btn btn-primary" onclick="calculateMonthlyPayment()">Calculate Monthly Payment</button>
+  <p>Monthly payment: $<span id="monthlyPayment"></span></p>
+</div>
+<script>
+function calculateMonthlyPayment() {
+  var numPayments = document.getElementById("numPayments").value;
+  var interestRate = document.getElementById("interestRate").value;
+  var loanAmount = document.getElementById("loanAmount").value;
+  var monthlyInterestRate = (interestRate / 100) / 12;
+  var numerator = monthlyInterestRate * Math.pow((1 + monthlyInterestRate), numPayments);
+  var denominator = Math.pow((1 + monthlyInterestRate), numPayments) - 1;
+  var monthlyPayment = (loanAmount * (numerator / denominator)).toFixed(2);
+  document.getElementById("monthlyPayment").innerHTML = monthlyPayment;
+}
+</script>
+</body>
+</html>

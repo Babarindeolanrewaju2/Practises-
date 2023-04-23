@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Next Birthday Calculator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Next Birthday Calculator</h1>
+  <div class="form-group">
+    <label for="birthdate">Enter your birthdate:</label>
+    <input type="date" class="form-control" id="birthdate">
+  </div>
+  <button type="button" class="btn btn-primary" onclick="calculateNextBirthday()">Calculate Next Birthday</button>
+  <p>Days to next birthday: <span id="daysToNextBirthday"></span></p>
+</div>
+<script>
+function calculateNextBirthday() {
+  var birthdate = document.getElementById("birthdate").value;
+  var today = new Date();
+  var birthDate = new Date(birthdate);
+  birthDate.setFullYear(today.getFullYear());
+  if (birthDate.getTime() < today.getTime()) {
+    birthDate.setFullYear(today.getFullYear() + 1);
+  }
+  var timeDiff = Math.abs(birthDate.getTime() - today.getTime());
+  var daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  document.getElementById("daysToNextBirthday").innerHTML = daysDiff;
+}
+</script>
+</body>
+</html>
