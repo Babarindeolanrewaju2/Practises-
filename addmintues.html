@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Date and Time Calculator</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+	<div class="container mt-5">
+		<h1 class="mb-4">Date and Time Calculator</h1>
+		<div class="form-group">
+			<label for="date">Select a Date:</label>
+			<input type="date" class="form-control" id="date" value="2022-01-01">
+		</div>
+		<div class="form-group">
+			<label for="time">Select a Time:</label>
+			<input type="time" class="form-control" id="time" value="12:00">
+		</div>
+		<div class="form-group">
+			<label for="minutes">Add Minutes:</label>
+			<input type="number" class="form-control" id="minutes" min="1" max="1440" value="60">
+		</div>
+		<button type="button" class="btn btn-primary" onclick="calculate()">Calculate</button>
+		<p id="result" class="mt-4"></p>
+	</div>
+	<!-- Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script>
+		function calculate() {
+			// Get the input values
+			const dateInput = document.getElementById("date").value;
+			const timeInput = document.getElementById("time").value;
+			const minutesInput = parseInt(document.getElementById("minutes").value);
+
+			// Create a Date object from the input values
+			const date = new Date(dateInput + "T" + timeInput);
+
+			// Add the minutes to the Date object
+			date.setMinutes(date.getMinutes() + minutesInput);
+
+			// Get the resulting day of the week, date, and time
+			const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+			const dayOfWeek = daysOfWeek[date.getDay()];
+			const month = date.getMonth() + 1;
+			const day = date.getDate();
+			const year = date.getFullYear();
+			const hours = date.getHours();
+			const minutes = date.getMinutes();
+
+			// Create the result string and update the HTML
+			const result = `The resulting day is ${dayOfWeek}, ${month}/${day}/${year} at ${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+			document.getElementById("result").textContent = result;
+		}
+	</script>
+</body>
+</html>
