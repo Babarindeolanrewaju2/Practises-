@@ -54,27 +54,31 @@ const Record = mongoose.model('Record', recordSchema);
 const app = express();
 
 // Connect to MongoDB database
-mongoose.connect('mongodb://localhost/library', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('Connected to database');
-}).catch((err) => {
-    console.log(err);
-});
+(async () => {
+    try {
+        await mongoose.connect('mongodb://localhost/library', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('Connected to database');
+    } catch (err) {
+        console.log(err);
+    }
+})();
 
 // Set up route to get all books
-app.get('/books', (req, res) => {
-    Book.find().then((books) => {
+app.get('/books', async (req, res) => {
+    try {
+        const books = await Book.find();
         res.status(200).send(books);
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         res.status(500).send(err);
-    });
+    }
 });
 
 // Set up route to add a book
-app.post('/books', (req, res) => {
+app.post('/books', async (req, res) => {
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
@@ -82,36 +86,39 @@ app.post('/books', (req, res) => {
         available: req.body.available
     });
 
-    book.save().then(() => {
+    try {
+        await book.save();
         res.status(201).send(book);
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         res.status(400).send(err);
-    });
+    }
 });
 
 // Set up route to remove a book
-app.delete('/books/:id', (req, res) => {
-    Book.findByIdAndDelete(req.params.id).then(() => {
+app.delete('/books/:id', async (req, res) => {
+    try {
+        await Book.findByIdAndDelete(req.params.id);
         res.status(200).send('Book deleted');
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         res.status(500).send(err);
-    });
+    }
 });
 
 // Set up route to get all records
-app.get('/records', (req, res) => {
-    Record.find().populate('book').then((records) => {
+app.get('/records', async (req, res) => {
+    try {
+        const records = await Record.find().populate('book');
         res.status(200).send(records);
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         res.status(500).send(err);
-    });
+    }
 });
 
 // Set up route to add a record
-app.post('/records', (req, res) => {
+app.post('/records', async (req, res) => {
     const record = new Record({
         book: req.body.book,
         borrower: req.body.borrower,
@@ -119,38 +126,33 @@ app.post('/records', (req, res) => {
         returnDate: req.body.returnDate
     });
 
-    record.save().then(() => {
-        Book.findByIdAndUpdate(req.body.book, {
+    try {
+        await record.save();
+        await Book.findByIdAndUpdate(req.body.book, {
             available: false
-        }).then(() => {
-            res.status(201).send(record);
-        }).catch((err) => {
-            console.log(err);
-            res.status(500).send(err);
         });
-    }).catch((err) => {
-        console.log(err);
-        res.status(400).send(err);
-    });
-});
-
-// Set up route to update a record
-app.put('/records/:id', (req, res) => {
-    Record.findByIdAndUpdate(req.params.id, {
-        returnDate: req.body.returnDate
-    }).then(() => {
-        Book.findByIdAndUpdate(req.body.book, {
-            available: true
-        }).then(() => {
-            res.status(200).send('Record updated');
-        }).catch((err) => {
-            console.log(err);
-            res.status(500).send(err);
-        });
-    }).catch((err) => {
+        res.status(201).send(record);
+    } catch (err) {
         console.log(err);
         res.status(500).send(err);
-    });
+    }
+});
+
+// Set
+// up route to update a record
+app.put('/records/:id', async (req, res) => {
+    try {
+        await Record.findByIdAndUpdate(req.params.id, {
+            returnDate: req.body.returnDate
+        });
+        await Book.findByIdAndUpdate(req.body.book, {
+            available: true
+        });
+        res.status(200).send('Record updated');
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
 });
 
 // Start server
