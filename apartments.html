@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Apartment CRUD</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Apartment CRUD</h1>
+
+        <!-- Create form -->
+        <form id="create-form">
+            <h2>Create apartment</h2>
+            <div class="form-group">
+                <label for="post_title">Title</label>
+                <input type="text" class="form-control" id="post_title" placeholder="Enter title">
+            </div>
+            <div class="form-group">
+                <label for="post_content">Content</label>
+                <textarea class="form-control" id="post_content" placeholder="Enter content"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        <!-- Table of apartments -->
+        <h2>Apartment list</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="apartment-list">
+            </tbody>
+        </table>
+
+        <!-- Edit modal -->
+        <div class="modal" tabindex="-1" role="dialog" id="edit-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form id="edit-form">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit apartment</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="edit-post_title">Title</label>
+                                <input type="text" class="form-control" id="edit-post_title" placeholder="Enter title">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-post_content">Content</label>
+                                <textarea class="form-control" id="edit-post_content"
+                                    placeholder="Enter content"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js">
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Get list of apartments on page load
+            getApartments();
+
+            // Submit create form
+            $('#create-form').submit(function (event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/apartments',
+                    data: formData,
+                    success: function (response) {
+                        // Clear form inputs and update table
+                        $('#create-form')[0].reset();
+                        getApartments();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Open edit modal and fill form fields
+            $(document).on('click', '.edit-btn', function () {
+                var apartmentId = $(this).data('id');
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/apartments/' + apartmentId,
+                    success: function (response) {
+                        $('#edit-post_title').val(response.post_title);
+                        $('#edit-post_content').val(response.post_content);
+                        $('#edit-form').attr('data-id',
+                            apartmentId); // set data-id attribute to apartment ID
+                        $('#edit-modal').modal('show');
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Submit edit form
+            $('#edit-form').submit(function (event) {
+                event.preventDefault();
+                var apartmentId = $(this).data('id');
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/apartments/' + apartmentId,
+                    data: formData,
+                    success: function (response) {
+                        // Close modal, clear form inputs, and update table
+                        $('#edit-modal').modal('hide');
+                        $('#edit-form')[0].reset();
+                        getApartments();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Delete apartment
+            $(document).on('click', '.delete-btn', function () {
+                var apartmentId = $(this).data('id');
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/api/apartments/' + apartmentId,
+                    success: function (response) {
+                        getApartments();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+
+        function getApartments() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/apartments',
+                success: function (response) {
+                    var apartmentList = '';
+                    response.forEach(function (apartment) {
+                        apartmentList += '<tr>';
+                        apartmentList += '<td>' + apartment.post_title + '</td>';
+                        apartmentList += '<td>' + apartment.post_content + '</td>';
+                        apartmentList +=
+                            '<td><button class="btn btn-primary edit-btn" data-id="' +
+                            apartment._id + '">Edit</button> ';
+                        apartmentList +=
+                            '<button class="btn btn-danger delete-btn" data-id="' +
+                            apartment._id + '">Delete</button></td>';
+                        apartmentList += '</tr>';
+                    });
+                    $('#apartment-list').html(apartmentList);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
