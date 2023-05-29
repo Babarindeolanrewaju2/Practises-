@@ -1,4 +1,5 @@
 import pandas as pd
+import psycopg2
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 
@@ -6,8 +7,12 @@ from shapely.geometry import Point
 
 
 def extract_data():
-    # Example: Extract geology data from a CSV file
-    geology_data = pd.read_csv('geology_data.csv')
+    # Example: Connect to the SQL database and execute a query to retrieve the geology data
+    conn = psycopg2.connect(host='your_host', port='your_port',
+                            user='your_user', password='your_password', database='your_database')
+    query = "SELECT * FROM geology_table"
+    geology_data = pd.read_sql_query(query, conn)
+    conn.close()
     return geology_data
 
 # Step 2: Transform data
@@ -33,8 +38,11 @@ def analyze_data(transformed_data):
 
 
 def store_results(results):
-    # Example: Save the analysis results to a new CSV file
-    results.to_csv('analysis_results.csv', index=False)
+    # Example: Save the analysis results to a new SQL table
+    conn = psycopg2.connect(host='your_host', port='your_port',
+                            user='your_user', password='your_password', database='your_database')
+    results.to_sql('analysis_results', conn, index=False, if_exists='replace')
+    conn.close()
 
 # Step 5: Visualize results
 
