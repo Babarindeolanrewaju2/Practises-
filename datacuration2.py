@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 
+
 def clean_data(df):
     # Remove leading/trailing whitespaces from string columns
     string_columns = df.select_dtypes(include="object").columns
@@ -10,6 +11,7 @@ def clean_data(df):
     df["date_column"] = pd.to_datetime(df["date_column"], format="%Y-%m-%d")
 
     return df
+
 
 def validate_data(df):
     # Check for missing values
@@ -21,12 +23,14 @@ def validate_data(df):
     # Check for email format validity using regular expressions
     email_column = "email_column"
     pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
-    invalid_emails = df[~df[email_column].str.match(pattern, na=False)][email_column]
+    invalid_emails = df[~df[email_column].str.match(
+        pattern, na=False)][email_column]
     if not invalid_emails.empty:
         print("Invalid email addresses found:")
         print(invalid_emails)
 
     # Additional data validation checks...
+
 
 def transform_data(df):
     # Apply transformations to columns
@@ -36,6 +40,7 @@ def transform_data(df):
     # Additional data transformations...
 
     return df
+
 
 # Load data from a CSV file
 data = pd.read_csv("/path/to/data.csv")
